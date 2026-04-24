@@ -1,37 +1,23 @@
-import { nanoid } from "nanoid";
 import type { Thread } from "@/types";
 import { USER_IDS } from "./users";
 import { CATEGORY_IDS } from "./categories";
 
-const newId = () => `thread_${nanoid(8)}`;
-
-const codeOfConductId = newId();
-const secPlusPassedId = newId();
-const wiresharkLabId = newId();
-const internshipsCuId = newId();
-const cysaStudyGroupId = newId();
-const laptopSpecsId = newId();
-const week1JittersId = newId();
-const tryhackmeVsHtbId = newId();
-const resumeReviewId = newId();
-const certsVsDegreesId = newId();
-
 export const THREAD_IDS = {
-  codeOfConduct: codeOfConductId,
-  secPlusPassed: secPlusPassedId,
-  wiresharkLab: wiresharkLabId,
-  internshipsCu: internshipsCuId,
-  cysaStudyGroup: cysaStudyGroupId,
-  laptopSpecs: laptopSpecsId,
-  week1Jitters: week1JittersId,
-  tryhackmeVsHtb: tryhackmeVsHtbId,
-  resumeReview: resumeReviewId,
-  certsVsDegrees: certsVsDegreesId,
+  codeOfConduct: "thread_code_of_conduct",
+  secPlusPassed: "thread_secplus_pass",
+  wiresharkLab: "thread_wireshark_lab",
+  internshipsCu: "thread_internships_cu",
+  cysaStudyGroup: "thread_cysa_study_group",
+  laptopSpecs: "thread_laptop_specs",
+  week1Jitters: "thread_week1_jitters",
+  tryhackmeVsHtb: "thread_tryhackme_vs_htb",
+  resumeReview: "thread_resume_review",
+  certsVsDegrees: "thread_certs_vs_degrees",
 };
 
 export const mockThreads: Thread[] = [
   {
-    id: codeOfConductId,
+    id: THREAD_IDS.codeOfConduct,
     title: "Community Guidelines — please read before posting",
     categoryId: CATEGORY_IDS.general,
     authorId: USER_IDS.admin,
@@ -42,7 +28,7 @@ export const mockThreads: Thread[] = [
     lastActivityAt: "2025-08-01T00:00:00Z",
   },
   {
-    id: secPlusPassedId,
+    id: THREAD_IDS.secPlusPassed,
     title: "Passed Security+ on the first try — here's what worked",
     categoryId: CATEGORY_IDS.certs,
     authorId: USER_IDS.jake,
@@ -53,7 +39,7 @@ export const mockThreads: Thread[] = [
     lastActivityAt: "2026-04-23T19:02:00Z",
   },
   {
-    id: wiresharkLabId,
+    id: THREAD_IDS.wiresharkLab,
     title: "Anyone else struggling with the Wireshark lab in Module 4?",
     categoryId: CATEGORY_IDS.labs,
     authorId: USER_IDS.sara,
@@ -64,7 +50,7 @@ export const mockThreads: Thread[] = [
     lastActivityAt: "2026-04-22T21:18:00Z",
   },
   {
-    id: internshipsCuId,
+    id: THREAD_IDS.internshipsCu,
     title: "Internship opportunities at local credit unions?",
     categoryId: CATEGORY_IDS.career,
     authorId: USER_IDS.devon,
@@ -75,7 +61,7 @@ export const mockThreads: Thread[] = [
     lastActivityAt: "2026-04-21T14:55:00Z",
   },
   {
-    id: cysaStudyGroupId,
+    id: THREAD_IDS.cysaStudyGroup,
     title: "Study group forming for CySA+ — meeting Thursdays",
     categoryId: CATEGORY_IDS.certs,
     authorId: USER_IDS.devon,
@@ -86,7 +72,7 @@ export const mockThreads: Thread[] = [
     lastActivityAt: "2026-04-23T20:41:00Z",
   },
   {
-    id: laptopSpecsId,
+    id: THREAD_IDS.laptopSpecs,
     title: "What laptop specs did you get for the program?",
     categoryId: CATEGORY_IDS.general,
     authorId: USER_IDS.marcus,
@@ -97,7 +83,7 @@ export const mockThreads: Thread[] = [
     lastActivityAt: "2026-04-22T16:10:00Z",
   },
   {
-    id: week1JittersId,
+    id: THREAD_IDS.week1Jitters,
     title: "First-week jitters — anyone else feeling overwhelmed?",
     categoryId: CATEGORY_IDS.general,
     authorId: USER_IDS.priya,
@@ -108,7 +94,7 @@ export const mockThreads: Thread[] = [
     lastActivityAt: "2026-04-20T13:02:00Z",
   },
   {
-    id: tryhackmeVsHtbId,
+    id: THREAD_IDS.tryhackmeVsHtb,
     title: "TryHackMe vs Hack The Box for a beginner — which one first?",
     categoryId: CATEGORY_IDS.labs,
     authorId: USER_IDS.marcus,
@@ -119,7 +105,7 @@ export const mockThreads: Thread[] = [
     lastActivityAt: "2026-04-15T22:33:00Z",
   },
   {
-    id: resumeReviewId,
+    id: THREAD_IDS.resumeReview,
     title: "Resume review — first cybersecurity-focused version",
     categoryId: CATEGORY_IDS.career,
     authorId: USER_IDS.sara,
@@ -130,7 +116,7 @@ export const mockThreads: Thread[] = [
     lastActivityAt: "2026-04-10T11:20:00Z",
   },
   {
-    id: certsVsDegreesId,
+    id: THREAD_IDS.certsVsDegrees,
     title: "Certs vs four-year degree — how did you decide?",
     categoryId: CATEGORY_IDS.alumni,
     authorId: USER_IDS.jake,

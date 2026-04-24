@@ -1,29 +1,17 @@
-import { nanoid } from "nanoid";
 import type { User } from "@/types";
 
-const newId = () => `user_${nanoid(8)}`;
-
-const marcusId = newId();
-const priyaId = newId();
-const devonId = newId();
-const saraId = newId();
-const jakeId = newId();
-const adminId = newId();
-
-// Cross-file references use these stable keys; the underlying IDs are
-// regenerated per process but internally consistent within it.
 export const USER_IDS = {
-  marcus: marcusId,
-  priya: priyaId,
-  devon: devonId,
-  sara: saraId,
-  jake: jakeId,
-  admin: adminId,
+  marcus: "user_marcus",
+  priya: "user_priya",
+  devon: "user_devon",
+  sara: "user_sara",
+  jake: "user_jake",
+  admin: "user_admin",
 };
 
 export const mockUsers: User[] = [
   {
-    id: marcusId,
+    id: USER_IDS.marcus,
     email: "marcus.chen@example.com",
     displayName: "Marcus Chen",
     role: "prospective",
@@ -31,7 +19,7 @@ export const mockUsers: User[] = [
     createdAt: "2026-04-18T14:32:00Z",
   },
   {
-    id: priyaId,
+    id: USER_IDS.priya,
     email: "priya.patel@example.com",
     displayName: "Priya Patel",
     role: "prospective",
@@ -39,7 +27,7 @@ export const mockUsers: User[] = [
     createdAt: "2026-04-15T09:21:00Z",
   },
   {
-    id: devonId,
+    id: USER_IDS.devon,
     email: "devon.hayes@example.com",
     displayName: "Devon Hayes",
     role: "current",
@@ -48,7 +36,7 @@ export const mockUsers: User[] = [
     createdAt: "2025-08-20T10:00:00Z",
   },
   {
-    id: saraId,
+    id: USER_IDS.sara,
     email: "sara.nguyen@example.com",
     displayName: "Sara Nguyen",
     role: "current",
@@ -57,7 +45,7 @@ export const mockUsers: User[] = [
     createdAt: "2026-01-14T08:45:00Z",
   },
   {
-    id: jakeId,
+    id: USER_IDS.jake,
     email: "jake.ramirez@example.com",
     displayName: "Jake Ramirez",
     role: "alumni",
@@ -67,7 +55,7 @@ export const mockUsers: User[] = [
     createdAt: "2022-08-15T00:00:00Z",
   },
   {
-    id: adminId,
+    id: USER_IDS.admin,
     email: "admin@fctc.example.edu",
     displayName: "Program Admin",
     role: "admin",

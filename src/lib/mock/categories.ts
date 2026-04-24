@@ -1,53 +1,44 @@
-import { nanoid } from "nanoid";
 import type { Category } from "@/types";
 
-const newId = () => `cat_${nanoid(8)}`;
-
-const generalId = newId();
-const certsId = newId();
-const careerId = newId();
-const labsId = newId();
-const alumniId = newId();
-
 export const CATEGORY_IDS = {
-  general: generalId,
-  certs: certsId,
-  career: careerId,
-  labs: labsId,
-  alumni: alumniId,
+  general: "cat_general",
+  certs: "cat_certs",
+  career: "cat_career",
+  labs: "cat_labs",
+  alumni: "cat_alumni",
 };
 
 export const mockCategories: Category[] = [
   {
-    id: generalId,
+    id: CATEGORY_IDS.general,
     name: "General Discussion",
     slug: "general",
     description: "Open forum for anything program-related.",
     sortOrder: 1,
   },
   {
-    id: certsId,
+    id: CATEGORY_IDS.certs,
     name: "Certifications",
     slug: "certs",
     description: "Study tips, prep resources, and exam stories.",
     sortOrder: 2,
   },
   {
-    id: careerId,
+    id: CATEGORY_IDS.career,
     name: "Career & Jobs",
     slug: "career",
     description: "Internships, interviews, and job leads.",
     sortOrder: 3,
   },
   {
-    id: labsId,
+    id: CATEGORY_IDS.labs,
     name: "Labs & Projects",
     slug: "labs",
     description: "Help with assignments, lab tips, and showcase projects.",
     sortOrder: 4,
   },
   {
-    id: alumniId,
+    id: CATEGORY_IDS.alumni,
     name: "Alumni Network",
     slug: "alumni",
     description: "Alumni check-ins and mentorship.",

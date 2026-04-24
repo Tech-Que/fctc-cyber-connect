@@ -9,3 +9,7 @@ Deferred work, technical debt, and post-MVP ideas.
 ## Deferred polish
 
 - **Fresh-visit flash on direct-linked (app) routes.** A user landing directly on `/dashboard` or `/admin` with no stored theme preference sees one paint of light before `AppThemeDefault`'s `useEffect` flips them to dark. Path-aware pre-hydration script would fix; deferred until auth gating changes the scenario — in Phase 2 these routes become auth-gated and unauthenticated direct visits redirect, so the flash window disappears naturally for anyone actually reaching the page. Captured 2026-04-23 during Step 6.
+
+## Content to source later
+
+- **Additional FCTC-specific URLs** — locate real student-resources pages on fctc.edu and add to `src/lib/mock/resources.ts` as source material becomes available.

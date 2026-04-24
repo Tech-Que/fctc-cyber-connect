@@ -1,11 +1,8 @@
-import { nanoid } from "nanoid";
 import type { Resource } from "@/types";
-
-const newId = () => `res_${nanoid(8)}`;
 
 export const mockResources: Resource[] = [
   {
-    id: newId(),
+    id: "res_comptia_security",
     title: "CompTIA Security+",
     url: "https://www.comptia.org/certifications/security",
     description:
@@ -14,7 +11,7 @@ export const mockResources: Resource[] = [
     sortOrder: 1,
   },
   {
-    id: newId(),
+    id: "res_comptia_network",
     title: "CompTIA Network+",
     url: "https://www.comptia.org/certifications/network",
     description: "Networking fundamentals; strong complement to Security+.",
@@ -22,7 +19,7 @@ export const mockResources: Resource[] = [
     sortOrder: 2,
   },
   {
-    id: newId(),
+    id: "res_comptia_cysa",
     title: "CompTIA CySA+",
     url: "https://www.comptia.org/certifications/cybersecurity-analyst",
     description:
@@ -31,7 +28,7 @@ export const mockResources: Resource[] = [
     sortOrder: 3,
   },
   {
-    id: newId(),
+    id: "res_professor_messer",
     title: "Professor Messer",
     url: "https://www.professormesser.com",
     description:
@@ -40,7 +37,7 @@ export const mockResources: Resource[] = [
     sortOrder: 4,
   },
   {
-    id: newId(),
+    id: "res_tryhackme",
     title: "TryHackMe",
     url: "https://tryhackme.com",
     description:
@@ -49,7 +46,7 @@ export const mockResources: Resource[] = [
     sortOrder: 1,
   },
   {
-    id: newId(),
+    id: "res_hackthebox",
     title: "Hack The Box",
     url: "https://www.hackthebox.com",
     description:
@@ -58,7 +55,7 @@ export const mockResources: Resource[] = [
     sortOrder: 2,
   },
   {
-    id: newId(),
+    id: "res_overthewire",
     title: "OverTheWire",
     url: "https://overthewire.org/wargames/",
     description:
@@ -67,7 +64,7 @@ export const mockResources: Resource[] = [
     sortOrder: 3,
   },
   {
-    id: newId(),
+    id: "res_nist_csf",
     title: "NIST Cybersecurity Framework",
     url: "https://www.nist.gov/cyberframework",
     description:
@@ -76,7 +73,7 @@ export const mockResources: Resource[] = [
     sortOrder: 4,
   },
   {
-    id: newId(),
+    id: "res_cyberseek",
     title: "CyberSeek",
     url: "https://www.cyberseek.org",
     description:
@@ -85,7 +82,7 @@ export const mockResources: Resource[] = [
     sortOrder: 1,
   },
   {
-    id: newId(),
+    id: "res_indeed_cyber",
     title: "Indeed — cybersecurity jobs",
     url: "https://www.indeed.com/q-cybersecurity-jobs.html",
     description:
@@ -94,7 +91,7 @@ export const mockResources: Resource[] = [
     sortOrder: 2,
   },
   {
-    id: newId(),
+    id: "res_nice_framework",
     title: "NICE Cybersecurity Workforce Framework",
     url: "https://www.nist.gov/itl/applied-cybersecurity/nice/nice-framework-resource-center",
     description:
@@ -103,7 +100,7 @@ export const mockResources: Resource[] = [
     sortOrder: 3,
   },
   {
-    id: newId(),
+    id: "res_fctc",
     title: "First Coast Technical College",
     url: "https://www.fctc.edu",
     description:

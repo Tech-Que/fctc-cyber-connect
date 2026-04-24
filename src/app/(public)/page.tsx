@@ -10,7 +10,7 @@ import {
   Input,
 } from "@/components/ui";
 
-export default function Home() {
+export default function HomePage() {
   return (
     <Container className="py-10 flex flex-col gap-12">
       <header className="flex flex-col gap-2">

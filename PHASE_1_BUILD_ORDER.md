@@ -156,6 +156,8 @@ Per handoff §8. Placeholder content is fine; every route must render without a 
 - [ ] Each route group has its own `layout.tsx`. Per ADR-0009: `(public)/layout.tsx` is **light-mode default** (no `.dark` class on its wrapper); `(app)/layout.tsx` wraps its subtree with `.dark` so dashboard/admin/assistant default to dark mode. `(app)` is a stub now; becomes auth-gated in Phase 2.
 - [ ] **Commit:** `feat(routes): scaffold all 9 route placeholders`
 
+**Step 6 outcome (2026-04-23):** All 9 routes scaffolded. `src/app/page.tsx` moved to `src/app/(public)/page.tsx` so `/` inherits the public (light) theme default. Route-group layouts `(public)/layout.tsx` and `(app)/layout.tsx` are server components that render theme-default client components — `PublicThemeDefault` and `AppThemeDefault` at `src/components/layout/` — each of which runs a `useEffect` on mount: if `localStorage.getItem('fctc-theme') === null`, it adds or removes the `.dark` class to match the route-group default; otherwise it respects the user's explicit toggle choice. Both components return `null` (no DOM output, logic only). Public placeholders (`program`, `community`, `assistant`, `resources`, `login`, `signup`) and app placeholders (`dashboard`, `admin`) are minimal heading + paragraph pages wrapped in `Container`, using semantic tokens. All navigation links verified resolving.
+
 ---
 
 ## Step 7 — Mock data

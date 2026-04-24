@@ -136,6 +136,8 @@ Only build what Phase 1 pages actually use. No premature abstraction.
 - [ ] Keyboard-test: Tab through nav, Enter to activate, Esc to close drawer.
 - [ ] **Commit:** `feat(layout): mobile-first Nav + Footer + theme toggle`
 
+**Step 5 outcome (2026-04-23):** Nav, Footer, Shell, ThemeToggle all shipped. Logo mark wired via `next/image` from `public/brand/FCTC_CyberConnect_logo.png` in both nav lockups (desktop + mobile drawer) and footer. ThemeToggle at `src/components/layout/ThemeToggle.tsx` persists via `localStorage` key `fctc-theme`; root `layout.tsx` carries an inline synchronous init script in `<head>` (`suppressHydrationWarning` on `<html>`) to apply the stored theme before React hydrates, preventing the light-mode flash on dark-preference reload. Active-route styling via `usePathname()` — nav links pick up `text-accent` on their own subtree. Mobile drawer opens full-viewport over sticky nav (z-60 vs nav z-50), locks body scroll while open, closes on link tap or route change. `theme-color` metadata deferred to Step 10 per ADR-0008 sequencing.
+
 ---
 
 ## Step 6 — Route group scaffolds (all 9 routes)

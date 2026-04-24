@@ -102,15 +102,6 @@ export default function Home() {
           <Badge variant="danger">danger</Badge>
         </div>
       </section>
-
-      <footer className="mt-4 pt-6 border-t border-border">
-        <p className="text-sm text-text-muted">
-          Light mode by default. To preview dark mode, add{" "}
-          <code className="font-mono">class=&quot;dark&quot;</code> to{" "}
-          <code className="font-mono">&lt;html&gt;</code> in DevTools. Real
-          theme toggle lands in Step 5.
-        </p>
-      </footer>
     </Container>
   );
 }

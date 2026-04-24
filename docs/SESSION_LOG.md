@@ -15,3 +15,4 @@ Format: `YYYY-MM-DD | Step N | <commit subject or short action description>`
 2026-04-23 | Step 1.1 | Reverted build script to webpack per ADR-0007. Dev continues on Turbopack. Dev server currently running on 3001 due to port 3000 occupied by unrelated node.exe (PID 21980); not a blocker.
 2026-04-23 | Step 2 | Folder structure established per HANDOFF §6 (minus prisma/ and public/icons/ which come in later phases). .gitkeep placeholders in empty dirs.
 2026-04-23 | Step 2.1 | Hardened .gitignore for AI agent settings, IDE, OS, and local env files. Pre-emptive guard before public-flip at end of Phase 2.
+2026-04-23 | Step 3 | Tailwind 4 @theme cyber palette in globals.css. Inter + JetBrains Mono wired via next/font/google. Dark mode default. Visual verification on localhost.

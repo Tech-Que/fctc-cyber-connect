@@ -39,3 +39,15 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# AI coding agent local settings (per-user, not shared)
+.claude/
+
+# IDE / editor
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS (.DS_Store already covered above under "misc")
+Thumbs.db

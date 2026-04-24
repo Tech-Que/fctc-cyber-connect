@@ -1,125 +1,155 @@
+import Link from "next/link";
+import { ShieldCheck, Award, Rocket } from "lucide-react";
 import {
-  Badge,
-  Button,
   Card,
   CardBody,
-  CardFooter,
-  CardHeader,
-  CardTitle,
   Container,
-  Input,
 } from "@/components/ui";
-import { mockUsers, getAllThreads } from "@/lib/mock";
+import {
+  getAllThreads,
+  getCategoryById,
+  getUserById,
+} from "@/lib/mock";
+
+const FEATURES = [
+  {
+    Icon: ShieldCheck,
+    title: "Hands-on Labs",
+    body: "Practice in realistic virtualized environments. Build muscle memory for incident response, forensics, and vulnerability assessment.",
+  },
+  {
+    Icon: Award,
+    title: "Industry Certifications",
+    body: "Prepare for CompTIA Security+, Network+, and CySA+ — the credentials employers ask for first. Exam vouchers often covered by financial aid.",
+  },
+  {
+    Icon: Rocket,
+    title: "Career Pathways",
+    body: "Connect with alumni placed in SOC, audit, and cloud security roles. Career services supports resume review, interviews, and employer introductions.",
+  },
+];
+
+// Hero and closing CTA render a fixed dark gradient regardless of theme — the
+// one intentional override from our semantic-token rule. brand-* literals are
+// acceptable here because the surface is deliberately theme-agnostic.
+const HERO_PRIMARY =
+  "inline-flex items-center justify-center rounded-lg font-medium h-12 px-6 text-base bg-accent text-brand-navy hover:bg-accent-hover transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-white focus-visible:ring-offset-2 focus-visible:ring-offset-brand-navy";
+const HERO_SECONDARY =
+  "inline-flex items-center justify-center rounded-lg font-medium h-12 px-6 text-base border-2 border-brand-white/30 text-brand-white hover:bg-brand-white/10 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-white focus-visible:ring-offset-2 focus-visible:ring-offset-brand-navy";
 
 export default function HomePage() {
-  const threads = getAllThreads();
-  const firstThreeTitles = threads.slice(0, 3).map((t) => t.title);
+  const recentThreads = [...getAllThreads()]
+    .sort(
+      (a, b) =>
+        new Date(b.lastActivityAt).getTime() -
+        new Date(a.lastActivityAt).getTime(),
+    )
+    .slice(0, 4);
 
   return (
-    <Container className="py-10 flex flex-col gap-12">
-      <header className="flex flex-col gap-2">
-        <h1 className="font-display text-3xl sm:text-4xl font-bold tracking-wide text-text-primary">
-          FCTC CYBER CONNECT
-        </h1>
-        <p className="text-text-muted">
-          Step 4 UI primitive showcase. All colors via semantic tokens — the
-          same markup flips between light and dark themes.
-        </p>
-      </header>
-
-      <section className="flex flex-col gap-4">
-        <h2 className="font-display text-xl font-semibold text-text-primary">
-          Buttons
-        </h2>
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
-          {(["primary", "secondary", "ghost"] as const).map((variant) => (
-            <div key={variant} className="flex flex-col gap-3 items-start">
-              <span className="text-xs uppercase tracking-wide text-text-muted">
-                {variant}
-              </span>
-              <Button variant={variant} size="sm">
-                Small
-              </Button>
-              <Button variant={variant} size="md">
-                Medium
-              </Button>
-              <Button variant={variant} size="lg">
-                Large
-              </Button>
-            </div>
-          ))}
-        </div>
+    <>
+      <section className="bg-gradient-to-br from-brand-navy to-[#1a2f5c] py-20 md:py-32">
+        <Container className="flex flex-col items-center text-center gap-6">
+          <span className="text-highlight font-mono text-sm uppercase tracking-wider">
+            First Coast Technical College
+          </span>
+          <h1 className="font-display text-4xl md:text-6xl font-bold text-brand-white leading-tight max-w-4xl">
+            Launch Your Cybersecurity Career
+          </h1>
+          <p className="text-brand-gray text-lg md:text-xl max-w-2xl">
+            Connect with classmates, access industry certifications, and build
+            the skills employers want — all in one place.
+          </p>
+          <div className="flex flex-col sm:flex-row gap-4 mt-4">
+            <Link href="/program" className={HERO_PRIMARY}>
+              Explore the Program
+            </Link>
+            <Link href="/signup" className={HERO_SECONDARY}>
+              Join the Community
+            </Link>
+          </div>
+        </Container>
       </section>
 
-      <section className="flex flex-col gap-4">
-        <h2 className="font-display text-xl font-semibold text-text-primary">
-          Card
-        </h2>
-        <Card>
-          <CardHeader>
-            <CardTitle>Introduction to Cybersecurity</CardTitle>
-          </CardHeader>
-          <CardBody>
+      <section className="py-16">
+        <Container className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          {FEATURES.map(({ Icon, title, body }) => (
+            <Card key={title}>
+              <CardBody className="flex flex-col gap-3">
+                <Icon className="w-8 h-8 text-accent" />
+                <h3 className="font-display text-xl font-semibold text-text-primary">
+                  {title}
+                </h3>
+                <p className="text-text-muted">{body}</p>
+              </CardBody>
+            </Card>
+          ))}
+        </Container>
+      </section>
+
+      <section className="bg-bg-subtle border-y border-border py-16">
+        <Container className="flex flex-col gap-8">
+          <div className="flex flex-col gap-2 max-w-2xl">
+            <h2 className="font-display text-3xl font-bold text-text-primary">
+              Join the Conversation
+            </h2>
             <p className="text-text-muted">
-              A foundational course covering the core principles of information
-              security, common threat models, and hands-on lab exercises with
-              industry-standard tools.
+              Recent threads from current students and alumni.
             </p>
-          </CardBody>
-          <CardFooter>
-            <Button variant="primary" size="sm">
-              Enroll
-            </Button>
-          </CardFooter>
-        </Card>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {recentThreads.map((thread) => {
+              const author = getUserById(thread.authorId);
+              const category = getCategoryById(thread.categoryId);
+              return (
+                <Link
+                  key={thread.id}
+                  href="/community"
+                  className="group rounded-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
+                >
+                  <Card className="h-full group-hover:border-accent transition-colors">
+                    <CardBody className="flex flex-col gap-2">
+                      <div className="flex items-center justify-between text-xs text-text-muted">
+                        <span>{category?.name ?? ""}</span>
+                        <span>
+                          {thread.replyCount}{" "}
+                          {thread.replyCount === 1 ? "reply" : "replies"}
+                        </span>
+                      </div>
+                      <h3 className="text-base font-semibold text-text-primary group-hover:text-accent transition-colors">
+                        {thread.title}
+                      </h3>
+                      <p className="text-sm text-text-muted">
+                        by {author?.displayName ?? "Unknown"}
+                      </p>
+                    </CardBody>
+                  </Card>
+                </Link>
+              );
+            })}
+          </div>
+          <Link
+            href="/community"
+            className="text-accent hover:underline font-medium self-start"
+          >
+            View All Discussions →
+          </Link>
+        </Container>
       </section>
 
-      <section className="flex flex-col gap-4">
-        <h2 className="font-display text-xl font-semibold text-text-primary">
-          Inputs
-        </h2>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <Input label="Email" type="email" placeholder="you@example.com" />
-          <Input
-            label="Username"
-            placeholder="quenton"
-            hint="3–20 characters, letters and numbers only"
-          />
-          <Input
-            label="Password"
-            type="password"
-            placeholder="••••••••"
-            error="Password must be at least 8 characters"
-          />
-        </div>
+      <section className="py-16">
+        <Container className="flex flex-col items-center gap-6 text-center">
+          <h2 className="font-display text-3xl font-bold text-text-primary">
+            Ready to Get Started?
+          </h2>
+          <p className="text-text-muted max-w-xl">
+            Create an account to post, reply, and get matched with mentors.
+          </p>
+          <Link href="/signup" className={HERO_PRIMARY}>
+            Create Your Account
+          </Link>
+        </Container>
       </section>
-
-      <section className="flex flex-col gap-4">
-        <h2 className="font-display text-xl font-semibold text-text-primary">
-          Badges
-        </h2>
-        <div className="flex flex-wrap gap-2">
-          <Badge>default</Badge>
-          <Badge variant="primary">primary</Badge>
-          <Badge variant="success">success</Badge>
-          <Badge variant="warning">warning</Badge>
-          <Badge variant="danger">danger</Badge>
-        </div>
-      </section>
-
-      <section className="flex flex-col gap-4">
-        <h2 className="font-display text-xl font-semibold text-text-primary">
-          Mock data sanity check
-        </h2>
-        <p className="text-sm text-text-muted">
-          Users: {mockUsers.length} &middot; Threads: {threads.length}
-        </p>
-        <ul className="text-sm text-text-muted flex flex-col gap-1">
-          {firstThreeTitles.map((title) => (
-            <li key={title}>&bull; {title}</li>
-          ))}
-        </ul>
-      </section>
-    </Container>
+    </>
   );
 }

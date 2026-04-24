@@ -9,8 +9,12 @@ import {
   Container,
   Input,
 } from "@/components/ui";
+import { mockUsers, getAllThreads } from "@/lib/mock";
 
 export default function HomePage() {
+  const threads = getAllThreads();
+  const firstThreeTitles = threads.slice(0, 3).map((t) => t.title);
+
   return (
     <Container className="py-10 flex flex-col gap-12">
       <header className="flex flex-col gap-2">
@@ -101,6 +105,20 @@ export default function HomePage() {
           <Badge variant="warning">warning</Badge>
           <Badge variant="danger">danger</Badge>
         </div>
+      </section>
+
+      <section className="flex flex-col gap-4">
+        <h2 className="font-display text-xl font-semibold text-text-primary">
+          Mock data sanity check
+        </h2>
+        <p className="text-sm text-text-muted">
+          Users: {mockUsers.length} &middot; Threads: {threads.length}
+        </p>
+        <ul className="text-sm text-text-muted flex flex-col gap-1">
+          {firstThreeTitles.map((title) => (
+            <li key={title}>&bull; {title}</li>
+          ))}
+        </ul>
       </section>
     </Container>
   );

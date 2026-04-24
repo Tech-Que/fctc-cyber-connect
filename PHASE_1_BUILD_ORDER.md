@@ -172,6 +172,8 @@ Shapes match the Phase 3 Prisma schema (handoff §11) so swapping mock → real 
 - [ ] `types/` — shared interfaces that the mocks and future Prisma types both satisfy.
 - [ ] **Commit:** `feat(mock): seed data matching future Prisma schema`
 
+**Step 7 outcome (2026-04-23):** Shared types in `src/types/` (User, Role, Thread, Post, Comment, Category, Resource, FAQ). Mock data in `src/lib/mock/` with soft-delete-aware helper functions (`getAllThreads`, `getThreadsByCategory`, `getUserById`, `getPublishedFaqs`, etc.) — every query filters `deletedAt != null` to match the eventual Prisma query shape. IDs use nanoid-suffixed prefixes (`user_`, `thread_`, `post_`, `cat_`, `res_`, `faq_`, `comment_`) generated once at module load and shared across files via named `USER_IDS` / `CATEGORY_IDS` / `THREAD_IDS` / `POST_IDS` constants. Types are the contract for the Phase 3 Prisma swap — same shape, different source.
+
 ---
 
 ## Step 8 — Page content (placeholder, uses mocks)

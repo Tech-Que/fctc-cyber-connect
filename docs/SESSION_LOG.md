@@ -16,3 +16,4 @@ Format: `YYYY-MM-DD | Step N | <commit subject or short action description>`
 2026-04-23 | Step 2 | Folder structure established per HANDOFF §6 (minus prisma/ and public/icons/ which come in later phases). .gitkeep placeholders in empty dirs.
 2026-04-23 | Step 2.1 | Hardened .gitignore for AI agent settings, IDE, OS, and local env files. Pre-emptive guard before public-flip at end of Phase 2.
 2026-04-23 | Step 3 | Tailwind 4 @theme cyber palette in globals.css. Inter + JetBrains Mono wired via next/font/google. Dark mode default. Visual verification on localhost.
+2026-04-23 | Step 3.1 | Brand kit adopted (ADR-0008). Hybrid light/dark theme (ADR-0009). Semantic color tokens in globals.css, both light and dark variants. Orbitron added as --font-display. Theme defaults move to route group layouts (public=light, app=dark). ADR-0002 superseded by ADR-0008. Brand assets at public/brand/. ADR seed file created at docs/decisions.md.

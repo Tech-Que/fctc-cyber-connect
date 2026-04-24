@@ -89,6 +89,8 @@ docs/
 
 Tailwind 4 uses **CSS-first configuration** (`@theme` directive inside `globals.css`) instead of a JS/TS config file. See ADR-0007.
 
+**Step 3.1 supersedes the palette below.** The generic cyber-dark palette originally listed here was replaced with the official FCTC brand palette and a hybrid light/dark theme strategy — see **ADR-0008** (brand identity) and **ADR-0009** (hybrid theme). The canonical values live in the actual `src/app/globals.css`; the palette snippet and `<html className="dark">` instruction below are preserved only for historical context and do not reflect current state. In the live system: the `.dark` class attaches on route-group layouts (Step 6), not on `<html>`; semantic tokens (`bg-bg-base`, `text-text-primary`, `text-accent`, `border-border`) are the only colors components use. Orbitron was added as `--font-display` alongside Inter and JetBrains Mono.
+
 - [ ] `src/app/globals.css` — define the §7 palette inside a `@theme` block. Tailwind auto-generates utility classes (`bg-bg-base`, `text-accent-cyan`, `border-bg-card`, etc.):
 
   ```css
@@ -127,10 +129,12 @@ Only build what Phase 1 pages actually use. No premature abstraction.
 ## Step 5 — Layout & navigation
 
 - [ ] `components/layout/Nav.tsx` — hamburger drawer at <768px, horizontal nav at ≥768px. Links: Home, Program, Community, Assistant, Resources, Login, Signup.
+- [ ] `components/layout/Nav.tsx` — integrate logo mark using `public/brand/FCTC_CyberConnect_logo.png` (per ADR-0008) as the brand lockup.
 - [ ] `components/layout/Footer.tsx` — brand, minimal links.
+- [ ] `components/layout/ThemeToggle.tsx` — global theme toggle (light/dark) per ADR-0009. Writes preference to `localStorage`, toggles the `.dark` class on the route-group layout wrapper. Render in `Nav`. Theme persistence upgrades to a user preference column in Phase 2.
 - [ ] `app/layout.tsx` — wires Nav + Footer, sets metadata (title, description, theme-color), applies fonts.
 - [ ] Keyboard-test: Tab through nav, Enter to activate, Esc to close drawer.
-- [ ] **Commit:** `feat(layout): mobile-first Nav + Footer`
+- [ ] **Commit:** `feat(layout): mobile-first Nav + Footer + theme toggle`
 
 ---
 
@@ -147,7 +151,7 @@ Per handoff §8. Placeholder content is fine; every route must render without a 
 - [ ] `(public)/signup/page.tsx` — `/signup`
 - [ ] `(app)/dashboard/page.tsx` — `/dashboard`
 - [ ] `(app)/admin/page.tsx` — `/admin`
-- [ ] Each route group has its own `layout.tsx` (public is unauthenticated shell; app is a stub now, becomes auth-gated in Phase 2).
+- [ ] Each route group has its own `layout.tsx`. Per ADR-0009: `(public)/layout.tsx` is **light-mode default** (no `.dark` class on its wrapper); `(app)/layout.tsx` wraps its subtree with `.dark` so dashboard/admin/assistant default to dark mode. `(app)` is a stub now; becomes auth-gated in Phase 2.
 - [ ] **Commit:** `feat(routes): scaffold all 9 route placeholders`
 
 ---
@@ -197,7 +201,7 @@ Building the abstraction now — even with only a mock — because handoff §9 i
 
 - [ ] `npm i next-pwa` (or decide on hand-rolled SW — *ADR-0004 candidate*).
 - [ ] `public/manifest.json` — name, short_name, start_url, theme_color, background_color, display `standalone`, icons (192, 512, maskable).
-- [ ] Icon set in `public/icons/` — generate from a source SVG.
+- [ ] Icon set in `public/icons/` — generate 192, 512, and maskable variants from `public/brand/FCTC_CyberConnect_logo.png` (per ADR-0008).
 - [ ] Service worker caches app shell (html, css, JS bundles, core routes).
 - [ ] `app/offline/page.tsx` — friendly offline fallback.
 - [ ] Metadata (`themeColor`, `manifest`) wired in `app/layout.tsx`.
@@ -222,10 +226,12 @@ Write real content, not stubs. Handoff §15 requires each to be populated.
 
 - [ ] `README.md` — what it is, stack, `npm i` / `npm run dev`, screenshots placeholder, link to docs.
 - [ ] `docs/architecture.md` — layers diagram, phase plan, the AWS/AI/GRC narrative.
-- [ ] `docs/decisions.md` — ADR-0001 through ADR-0007 (package manager, theme, AI abstraction, PWA approach, Node target version, Next 15 pin, Tailwind 4 accept). Template: Context / Decision / Consequences.
+- [ ] `docs/decisions.md` — ADR-0001 through ADR-0009. Template: Context / Decision / Consequences. Note: ADR-0002 is **superseded by ADR-0008** (brand identity replaces the generic cyber-dark palette).
 - [ ] **ADR-0005:** Target Node 24 LTS with engines floor at 20 — context (Node 24 became current LTS Oct 2025; plan was written assuming Node 20), decision (accept Node 24, pin engines floor at 20 for flexibility), consequences (future contributors need Node 20+; .nvmrc specifies 24 for local dev consistency).
 - [ ] **ADR-0006:** Pin to Next.js 15 instead of Next 16 (current latest) — context (`create-next-app@latest` installed Next 16, which the framework's own `AGENTS.md` flags as "breaking changes — APIs, conventions, and file structure may all differ from training data"; downstream impact includes Tailwind 4 and `next.config.ts` divergences from the original plan), decision (pin to Next 15 via `create-next-app@^15`; use Tailwind 4 and accept `next.config.ts` as scaffold defaults), consequences (plan docs and folder structure remain largely accurate; more reliable AI-assisted development on a version agents have solid training data for; richer tutorial/SO ecosystem; trade-off of a known-quantity Next 16 migration later; React pinned to 19 since Next 15 supports it cleanly).
 - [ ] **ADR-0007:** Accept Tailwind 4 (CSS-first config) instead of Tailwind 3 — context (`create-next-app@^15` ships Tailwind 4 as the default CSS framework; Tailwind 4 has been stable since January 2025 and uses a CSS-first configuration model via the `@theme` directive instead of a JS config file; the Next 15 + Tailwind 4 pairing is the framework team's tested default), decision (accept Tailwind 4; define the cyber-dark theme palette in `src/app/globals.css` using `@theme` directives rather than `tailwind.config.ts`), consequences (Step 3 rewritten to CSS-first config; `next.config.ts` and Turbopack dev (`next dev --turbopack`) accepted as scaffold defaults; production build remains webpack unless explicitly changed; staying on the framework's tested default pairing reduces upgrade friction over time).
+- [ ] **ADR-0008:** Official brand identity adopted — context (brand kit produced with logo [owl/shield/circuit mark], tagline "CONNECT. LEARN. PROTECT.", typography [Orbitron display + Inter body], and a five-color palette; replaces the generic cyber-dark palette of ADR-0002 with a project-specific identity), decision (adopt the brand kit as the official visual identity; logo mark used for nav and PWA icon; Orbitron added for wordmark and display headings; Inter remains body; color palette replaces the provisional Step 3 palette), consequences (Step 3 globals.css theme tokens updated to the new palette; Step 5 integrates the logo mark; Step 10 PWA icons generated from the logo; Orbitron added via next/font/google; ADR-0002 is superseded by this one). Seeded in `docs/decisions.md` during Step 3.1.
+- [ ] **ADR-0009:** Hybrid light/dark theme strategy — context (original HANDOFF called for dark-only throughout; product review identified that text-heavy surfaces [threads, program info, AI chat] read better on light backgrounds for sustained reading; modern apps like GitHub/Notion/Linear treat dark/light as first-class toggleable themes), decision (light-mode default on public-facing marketing surfaces — landing, program, resources, community read view; dark-mode default on authenticated app surfaces — dashboard, assistant, admin; global theme toggle available everywhere; both themes use the same brand palette with semantic token roles remapped), consequences (globals.css defines both themes via `@theme` [light defaults] and a `.dark` variant; every component uses semantic tokens, never hardcoded colors or direct brand color names; route group layouts control default theme; theme toggle component added in Step 5; theme persistence deferred to Phase 2 with localStorage fallback for MVP). Seeded in `docs/decisions.md` during Step 3.1.
 - [ ] `docs/setup.md` — local dev setup, Node version, env vars, common issues.
 - [ ] `docs/security.md` — access-control model (role enum), moderation non-negotiables (soft-delete, audit log, reports, rate limits, server-side caps), threat model outline. Phase 1 notes what's stubbed; each later phase fills in its column.
 - [ ] `docs/roadmap.md` — anything deferred, Out-of-Scope items from §16.

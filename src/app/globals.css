@@ -1,17 +1,47 @@
 @import "tailwindcss";
 
-@theme inline {
-  --color-bg-base: #0a0e1a;
-  --color-bg-card: #111827;
-  --color-accent-cyan: #06b6d4;
-  --color-accent-blue: #3b82f6;
+@theme {
+  /* Brand palette (literal values — never reference directly in components) */
+  --color-brand-navy: #0B1D34;
+  --color-brand-gray: #A7B2BF;
+  --color-brand-green: #39FF14;
+  --color-brand-teal: #00E5FF;
+  --color-brand-white: #F8FAFC;
+
+  /* Semantic tokens — LIGHT theme (default) */
+  --color-bg-base: var(--color-brand-white);
+  --color-bg-card: #ffffff;
+  --color-bg-subtle: #f1f5f9;
+  --color-text-primary: var(--color-brand-navy);
+  --color-text-muted: #475569;
+  --color-border: #e2e8f0;
+  --color-accent: var(--color-brand-teal);
+  --color-accent-hover: #00b8cc;
+  --color-highlight: var(--color-brand-green);
   --color-success: #10b981;
   --color-warning: #f59e0b;
-  --color-text-primary: #e5e7eb;
-  --color-text-muted: #94a3b8;
+  --color-danger: #ef4444;
+}
 
+.dark {
+  --color-bg-base: var(--color-brand-navy);
+  --color-bg-card: #0f2544;
+  --color-bg-subtle: #152b4a;
+  --color-text-primary: var(--color-brand-white);
+  --color-text-muted: var(--color-brand-gray);
+  --color-border: #1e3a5f;
+  --color-accent: var(--color-brand-teal);
+  --color-accent-hover: #33ecff;
+  --color-highlight: var(--color-brand-green);
+  --color-success: #10b981;
+  --color-warning: #f59e0b;
+  --color-danger: #ef4444;
+}
+
+@theme inline {
   --font-sans: var(--font-inter);
   --font-mono: var(--font-jetbrains-mono);
+  --font-display: var(--font-orbitron);
 }
 
 html {
@@ -27,11 +57,11 @@ body {
 }
 
 ::selection {
-  background: var(--color-accent-cyan);
+  background: var(--color-accent);
   color: var(--color-bg-base);
 }
 
 :focus-visible {
-  outline: 2px solid var(--color-accent-cyan);
+  outline: 2px solid var(--color-accent);
   outline-offset: 2px;
 }

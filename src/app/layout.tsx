@@ -1,5 +1,5 @@
-import type { Metadata, Viewport } from "next";
-import { Inter, JetBrains_Mono } from "next/font/google";
+import type { Metadata } from "next";
+import { Inter, JetBrains_Mono, Orbitron } from "next/font/google";
 import "./globals.css";
 
 const inter = Inter({
@@ -12,14 +12,16 @@ const jetbrainsMono = JetBrains_Mono({
   subsets: ["latin"],
 });
 
+const orbitron = Orbitron({
+  variable: "--font-orbitron",
+  subsets: ["latin"],
+  weight: ["600", "700"],
+});
+
 export const metadata: Metadata = {
   title: "FCTC Cyber Connect",
   description:
-    "Mobile-first PWA for First Coast Technical College's cybersecurity program.",
-};
-
-export const viewport: Viewport = {
-  themeColor: "#0a0e1a",
+    "Cybersecurity program community for First Coast Technical College students and alumni",
 };
 
 export default function RootLayout({
@@ -30,7 +32,7 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`dark ${inter.variable} ${jetbrainsMono.variable}`}
+      className={`${inter.variable} ${jetbrainsMono.variable} ${orbitron.variable}`}
     >
       <body className="antialiased">{children}</body>
     </html>

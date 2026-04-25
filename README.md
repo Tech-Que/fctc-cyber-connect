@@ -2,7 +2,7 @@
 
 A mobile-first Progressive Web App connecting cybersecurity students at First Coast Technical College — for prospective applicants, current students, and alumni.
 
-**Status:** 🔨 Phase 1 (Frontend Shell) wrapping up. Phase 2 (Auth) is next.
+**Status:** ✅ Phase 1 (Frontend Shell) complete. Phase 2 (Auth) is next. Live at [fctc-cyber-connect.vercel.app](https://fctc-cyber-connect.vercel.app).
 
 <!-- TODO: add screenshot after Vercel deploy -->
 
@@ -52,7 +52,7 @@ See [`docs/architecture.md`](./docs/architecture.md) for the full picture.
 
 ## Phase status
 
-- 🔨 **Phase 1 — Frontend Shell:** UI primitives, route groups, mock data, brand identity, hybrid light/dark theme, AI provider abstraction with mock + API route + rate limiting, PWA configuration (Lighthouse 100/100), Zod-validated env, full documentation set.
+- ✅ **Phase 1 — Frontend Shell:** UI primitives, route groups, mock data, brand identity, hybrid light/dark theme, AI provider abstraction with mock + API route + rate limiting, PWA configuration (Lighthouse 100/100), Zod-validated env, full documentation set.
 - ⏳ **Phase 2 — Auth:** AWS Cognito integration, AuthProvider abstraction, role-based middleware, gated `(app)` routes, session persistence.
 - ⏳ **Phase 3 — Database:** Neon Postgres + Prisma, schema with soft-delete + audit log, migrations, seed data swap from mocks.
 - ⏳ **Phase 4 — Message Board:** Threads, posts, comments, categories, reports, moderation queue.

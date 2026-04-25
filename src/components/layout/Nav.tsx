@@ -58,7 +58,7 @@ export function Nav() {
               width={40}
               height={40}
               priority
-              className="w-10 h-10"
+              className="w-10 h-10 rounded-lg"
             />
             <span className="font-display text-base sm:text-lg font-semibold tracking-wide text-text-primary">
               Cyber Connect
@@ -125,7 +125,7 @@ export function Nav() {
                 alt="FCTC Cyber Connect"
                 width={40}
                 height={40}
-                className="w-10 h-10"
+                className="w-10 h-10 rounded-lg"
               />
               <span className="font-display text-lg font-semibold tracking-wide text-text-primary">
                 Cyber Connect

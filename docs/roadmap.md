@@ -12,6 +12,7 @@ Deferred work, technical debt, and post-MVP ideas.
 - **Rate limiter: replace in-memory `requestLog` Map with Redis-backed implementation** when deploying to multi-instance hosting. Current implementation works for single-instance dev; per-instance counting on Vercel is acceptable but imperfect.
 - **Assistant input length cap:** add `maxLength={2000}` plus visible character counter that turns red as the cap approaches. Server-side cap (10k chars) already enforced; UI prevention is UX polish.
 - **Real-iPhone verification:** complete the device-testing pass when back on home WiFi (hotel network blocked direct phone connection during Phase 1; DevTools iPhone 14 Pro Max viewport used as substitute).
+- **Replace `next-pwa@5.6.0` with `@ducanh2912/next-pwa`** (community-maintained fork on Workbox v7) when Phase 7 polish allows. The 7 npm audit warnings (2 moderate, 5 high) are workbox v6 transitive deps; predominantly dev-time impact, not runtime-exploitable in current usage. Risk-accepted for Phase 1.
 
 ## Content to source later
 

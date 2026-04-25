@@ -1,6 +1,8 @@
-// Phase 1 — stubs MockAIProvider. Step 9 formalizes the full AIProvider interface.
+// MockAIProvider — keyword-matched canned responses about the FCTC program.
+// Production-shaped: implements AIProvider so the factory can return it
+// interchangeably with ollama/openai/bedrock once those land in Phase 5+.
 
-import type { AIMessage } from "../types";
+import type { AIMessage, AIProvider } from "../types";
 
 const CANNED_RESPONSES: Array<{ match: RegExp; response: string }> = [
   {
@@ -33,18 +35,18 @@ const CANNED_RESPONSES: Array<{ match: RegExp; response: string }> = [
 const DEFAULT_RESPONSE =
   "I'm a placeholder AI assistant. Real responses arrive in Phase 5 when the AI provider abstraction integrates with Ollama, OpenAI, or AWS Bedrock. Try asking about certifications, program duration, financial aid, prerequisites, or job placement.";
 
-export async function generateMockResponse(
-  messages: AIMessage[],
-): Promise<string> {
-  // Simulate a small amount of network latency so the UI can show a
-  // "thinking" state and the mock experience feels more like the real thing.
-  await new Promise((resolve) => setTimeout(resolve, 500));
+export const mockProvider: AIProvider = {
+  name: "mock",
+  async generateResponse(messages: AIMessage[]): Promise<string> {
+    // Simulate a small amount of latency so the UI can show a "thinking" state.
+    await new Promise((resolve) => setTimeout(resolve, 500));
 
-  const lastUser = [...messages].reverse().find((m) => m.role === "user");
-  if (!lastUser) return DEFAULT_RESPONSE;
+    const lastUser = [...messages].reverse().find((m) => m.role === "user");
+    if (!lastUser) return DEFAULT_RESPONSE;
 
-  for (const { match, response } of CANNED_RESPONSES) {
-    if (match.test(lastUser.content)) return response;
-  }
-  return DEFAULT_RESPONSE;
-}
+    for (const { match, response } of CANNED_RESPONSES) {
+      if (match.test(lastUser.content)) return response;
+    }
+    return DEFAULT_RESPONSE;
+  },
+};

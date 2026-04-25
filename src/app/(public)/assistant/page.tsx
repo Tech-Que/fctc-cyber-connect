@@ -1,11 +1,11 @@
 "use client";
 
-// Phase 1 — stubs MockAIProvider. Step 9 formalizes the full AIProvider interface.
+// Calls /api/ai/generate, which runs through the AIProvider factory.
+// Provider is selected by AI_PROVIDER env var (defaults to "mock").
 
 import { useEffect, useRef, useState } from "react";
 import { Send } from "lucide-react";
 import { Button, Container, Input } from "@/components/ui";
-import { generateMockResponse } from "@/lib/ai/providers/mock";
 import type { AIMessage } from "@/lib/ai/types";
 import { cn } from "@/lib/utils/cn";
 
@@ -41,8 +41,35 @@ export default function AssistantPage() {
     setMessages(next);
     setInput("");
     setLoading(true);
-    const reply = await generateMockResponse(next);
-    setMessages([...next, { role: "assistant", content: reply }]);
+
+    let replyContent: string;
+    try {
+      const res = await fetch("/api/ai/generate", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ messages: next }),
+      });
+
+      if (res.status === 429) {
+        replyContent =
+          "You're sending messages too quickly — wait a minute and try again.";
+      } else if (res.status === 400) {
+        const data = (await res.json().catch(() => ({}))) as {
+          error?: string;
+        };
+        replyContent = data.error ?? "Bad request.";
+      } else if (!res.ok) {
+        replyContent = "Something went wrong. Please try again.";
+      } else {
+        const data = (await res.json()) as { response?: string };
+        replyContent =
+          data.response ?? "Something went wrong. Please try again.";
+      }
+    } catch {
+      replyContent = "Network error. Please check your connection.";
+    }
+
+    setMessages([...next, { role: "assistant", content: replyContent }]);
     setLoading(false);
   }
 

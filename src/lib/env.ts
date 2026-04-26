@@ -26,8 +26,10 @@ const serverEnvSchema = z.object({
   DIRECT_URL: z.string().url().optional(),
 
   // Auth (Phase 2)
+  AUTH_PROVIDER: z.enum(["cognito", "mock"]).default("mock"),
   COGNITO_USER_POOL_ID: z.string().optional(),
   COGNITO_CLIENT_ID: z.string().optional(),
+  COGNITO_CLIENT_SECRET: z.string().optional(),
   COGNITO_REGION: z.string().optional(),
   AUTH_SECRET: z.string().min(32).optional(),
 
@@ -70,6 +72,17 @@ function validateEnv() {
     throw new Error(
       "AI_PROVIDER=bedrock requires AWS_BEDROCK_REGION to be set.",
     );
+  }
+
+  if (env.AUTH_PROVIDER === "cognito") {
+    if (!env.COGNITO_USER_POOL_ID)
+      throw new Error("AUTH_PROVIDER=cognito requires COGNITO_USER_POOL_ID.");
+    if (!env.COGNITO_CLIENT_ID)
+      throw new Error("AUTH_PROVIDER=cognito requires COGNITO_CLIENT_ID.");
+    if (!env.COGNITO_CLIENT_SECRET)
+      throw new Error("AUTH_PROVIDER=cognito requires COGNITO_CLIENT_SECRET.");
+    if (!env.COGNITO_REGION)
+      throw new Error("AUTH_PROVIDER=cognito requires COGNITO_REGION.");
   }
 
   return env;

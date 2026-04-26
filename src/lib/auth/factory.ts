@@ -9,10 +9,5 @@ const providers: Record<AuthProviderName, AuthProvider> = {
 };
 
 export function getAuthProvider(): AuthProvider {
-  const name = env.AUTH_PROVIDER as AuthProviderName;
-  const provider = providers[name];
-  if (!provider) {
-    throw new Error(`Unknown AUTH_PROVIDER: ${name}. Valid: cognito, mock.`);
-  }
-  return provider;
+  return providers[env.AUTH_PROVIDER];
 }

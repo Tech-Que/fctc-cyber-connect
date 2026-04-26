@@ -3,11 +3,16 @@ import {
   SignUpCommand,
   ConfirmSignUpCommand,
   ResendConfirmationCodeCommand,
+  InitiateAuthCommand,
+  AuthFlowType,
   UsernameExistsException,
   InvalidParameterException,
   InvalidPasswordException,
   CodeMismatchException,
   ExpiredCodeException,
+  NotAuthorizedException,
+  UserNotConfirmedException,
+  UserNotFoundException,
 } from "@aws-sdk/client-cognito-identity-provider";
 import type {
   AuthProvider,
@@ -17,6 +22,7 @@ import type {
   SignUpInput,
 } from "../types";
 import { computeSecretHash } from "../cognito-helpers";
+import { verifyIdToken } from "../jwt-verifier";
 import { env } from "@/lib/env";
 
 // Lazy singleton — only instantiated when the first auth call happens, so we
@@ -106,10 +112,68 @@ export const cognitoProvider: AuthProvider = {
     );
   },
 
-  async signIn(_input: SignInInput): Promise<AuthSession> {
-    throw new Error(
-      "CognitoProvider.signIn not yet implemented (Phase 2 Step 3b).",
-    );
+  async signIn(input: SignInInput): Promise<AuthSession> {
+    const client = getClient();
+    try {
+      const result = await client.send(
+        new InitiateAuthCommand({
+          ClientId: env.COGNITO_CLIENT_ID!,
+          AuthFlow: AuthFlowType.USER_PASSWORD_AUTH,
+          AuthParameters: {
+            USERNAME: input.email,
+            PASSWORD: input.password,
+            SECRET_HASH: computeSecretHash(input.email),
+          },
+        }),
+      );
+
+      const tokens = result.AuthenticationResult;
+      if (!tokens?.IdToken || !tokens.AccessToken || !tokens.RefreshToken) {
+        throw new Error("Cognito returned incomplete authentication result.");
+      }
+
+      // Verify the IdToken and extract identity from claims.
+      const claims = await verifyIdToken(tokens.IdToken);
+
+      const role = claims["custom:role"];
+      if (
+        !role ||
+        !["prospective", "current", "alumni", "admin"].includes(role)
+      ) {
+        throw new Error(`User has invalid or missing role: ${role}`);
+      }
+
+      const expiresAt =
+        Math.floor(Date.now() / 1000) + (tokens.ExpiresIn ?? 3600);
+
+      return {
+        user: {
+          id: claims.sub,
+          email: claims.email,
+          role: role as AuthUser["role"],
+          displayName: claims.name ?? null,
+          emailVerified: claims.email_verified,
+        },
+        // We use IdToken as our session token because it carries custom
+        // claims (notably custom:role) — the AccessToken doesn't.
+        accessToken: tokens.IdToken,
+        refreshToken: tokens.RefreshToken,
+        expiresAt,
+      };
+    } catch (err) {
+      if (err instanceof NotAuthorizedException) {
+        throw new Error("Incorrect email or password.");
+      }
+      if (err instanceof UserNotConfirmedException) {
+        throw new Error(
+          "Account not confirmed. Check your email for the verification code.",
+        );
+      }
+      if (err instanceof UserNotFoundException) {
+        throw new Error("No account found with that email.");
+      }
+      throw err;
+    }
   },
 
   async signOut(_accessToken: string): Promise<void> {
@@ -118,10 +182,24 @@ export const cognitoProvider: AuthProvider = {
     );
   },
 
-  async getUserFromToken(_accessToken: string): Promise<AuthUser> {
-    throw new Error(
-      "CognitoProvider.getUserFromToken not yet implemented (Phase 2 Step 3b).",
-    );
+  async getUserFromToken(accessToken: string): Promise<AuthUser> {
+    const claims = await verifyIdToken(accessToken);
+
+    const role = claims["custom:role"];
+    if (
+      !role ||
+      !["prospective", "current", "alumni", "admin"].includes(role)
+    ) {
+      throw new Error(`User has invalid or missing role: ${role}`);
+    }
+
+    return {
+      id: claims.sub,
+      email: claims.email,
+      role: role as AuthUser["role"],
+      displayName: claims.name ?? null,
+      emailVerified: claims.email_verified,
+    };
   },
 
   async refreshSession(_refreshToken: string): Promise<AuthSession> {

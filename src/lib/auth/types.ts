@@ -73,9 +73,13 @@ export interface AuthProvider {
   getUserFromToken(accessToken: string): Promise<AuthUser>;
 
   /**
-   * Exchange a refresh token for a new access token.
+   * Exchange a refresh token for a new access token. Requires the existing
+   * (possibly-expired) ID token because Cognito's REFRESH_TOKEN_AUTH flow
+   * needs SECRET_HASH computed against the user's `sub` claim, not their
+   * email — and the refresh token itself is encrypted, so `sub` has to come
+   * from elsewhere. Caller passes both; the provider extracts what it needs.
    */
-  refreshSession(refreshToken: string): Promise<AuthSession>;
+  refreshSession(refreshToken: string, idToken: string): Promise<AuthSession>;
 
   /**
    * Initiate password reset (sends email with reset code).

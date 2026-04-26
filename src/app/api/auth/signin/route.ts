@@ -27,11 +27,12 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({
       user: session.user,
       expiresAt: session.expiresAt,
-      // TODO(Phase 2 Step 3d): remove this once HTTP-only cookie session is
-      // wired. Exposing the token in the JSON body is a temporary affordance
-      // for live testing of /api/auth/me; production-shaped sessions never
-      // hand the raw token to JS.
+      // TODO(Phase 2 Step 3d): remove these two fields once HTTP-only cookie
+      // session is wired. Exposing tokens in the JSON body is a temporary
+      // affordance for live testing of /api/auth/me and /api/auth/refresh;
+      // production-shaped sessions never hand the raw tokens to JS.
       accessToken: session.accessToken,
+      refreshToken: session.refreshToken,
       message:
         "Signed in successfully. Note: token-based session not yet wired (Step 3d).",
     });

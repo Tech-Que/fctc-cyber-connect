@@ -5,6 +5,8 @@ import {
   ResendConfirmationCodeCommand,
   InitiateAuthCommand,
   AuthFlowType,
+  ForgotPasswordCommand,
+  ConfirmForgotPasswordCommand,
   UsernameExistsException,
   InvalidParameterException,
   InvalidPasswordException,
@@ -13,6 +15,7 @@ import {
   NotAuthorizedException,
   UserNotConfirmedException,
   UserNotFoundException,
+  LimitExceededException,
 } from "@aws-sdk/client-cognito-identity-provider";
 import type {
   AuthProvider,
@@ -22,7 +25,7 @@ import type {
   SignUpInput,
 } from "../types";
 import { computeSecretHash } from "../cognito-helpers";
-import { verifyIdToken } from "../jwt-verifier";
+import { decodeIdToken, verifyIdToken } from "../jwt-verifier";
 import { env } from "@/lib/env";
 
 // Lazy singleton — only instantiated when the first auth call happens, so we
@@ -202,25 +205,129 @@ export const cognitoProvider: AuthProvider = {
     };
   },
 
-  async refreshSession(_refreshToken: string): Promise<AuthSession> {
-    throw new Error(
-      "CognitoProvider.refreshSession not yet implemented (Phase 2 Step 3b).",
-    );
+  async refreshSession(
+    refreshToken: string,
+    idToken: string,
+  ): Promise<AuthSession> {
+    const client = getClient();
+
+    // Cognito's REFRESH_TOKEN_AUTH flow needs SECRET_HASH when the App
+    // Client has a secret. The HMAC must be over the user's `sub` claim
+    // (NOT email) — refresh tokens are encrypted (JWE), so we can't read
+    // sub from them; we extract it from the existing IdToken instead.
+    // The IdToken may be expired by the time refresh is called; we use
+    // unverified decode here because the refresh token itself is what's
+    // authoritative — we just need sub for the HMAC computation.
+    const claims = decodeIdToken(idToken);
+    const sub = claims.sub;
+    if (!sub) {
+      throw new Error("Cannot refresh: existing IdToken has no sub claim.");
+    }
+
+    try {
+      const result = await client.send(
+        new InitiateAuthCommand({
+          ClientId: env.COGNITO_CLIENT_ID!,
+          AuthFlow: AuthFlowType.REFRESH_TOKEN_AUTH,
+          AuthParameters: {
+            REFRESH_TOKEN: refreshToken,
+            SECRET_HASH: computeSecretHash(sub),
+          },
+        }),
+      );
+
+      const tokens = result.AuthenticationResult;
+      if (!tokens?.IdToken) {
+        throw new Error("Cognito returned no IdToken on refresh.");
+      }
+
+      // Verify the new IdToken; refresh doesn't return a new RefreshToken
+      // (caller keeps the old one).
+      const claims = await verifyIdToken(tokens.IdToken);
+
+      const role = claims["custom:role"];
+      if (
+        !role ||
+        !["prospective", "current", "alumni", "admin"].includes(role)
+      ) {
+        throw new Error(`User has invalid or missing role: ${role}`);
+      }
+
+      const expiresAt =
+        Math.floor(Date.now() / 1000) + (tokens.ExpiresIn ?? 3600);
+
+      return {
+        user: {
+          id: claims.sub,
+          email: claims.email,
+          role: role as AuthUser["role"],
+          displayName: claims.name ?? null,
+          emailVerified: claims.email_verified,
+        },
+        accessToken: tokens.IdToken,
+        refreshToken, // Cognito doesn't rotate it; reuse the input.
+        expiresAt,
+      };
+    } catch (err) {
+      if (err instanceof NotAuthorizedException) {
+        throw new Error("Refresh token invalid or expired. Sign in again.");
+      }
+      throw err;
+    }
   },
 
-  async requestPasswordReset(_email: string): Promise<void> {
-    throw new Error(
-      "CognitoProvider.requestPasswordReset not yet implemented (Phase 2 Step 3c).",
-    );
+  async requestPasswordReset(email: string): Promise<void> {
+    const client = getClient();
+    try {
+      await client.send(
+        new ForgotPasswordCommand({
+          ClientId: env.COGNITO_CLIENT_ID!,
+          Username: email,
+          SecretHash: computeSecretHash(email),
+        }),
+      );
+    } catch (err) {
+      if (err instanceof LimitExceededException) {
+        throw new Error(
+          "Too many password reset attempts. Wait a few minutes and try again.",
+        );
+      }
+      // Note: Cognito intentionally returns the same response whether the user
+      // exists or not. This is correct behavior — prevents email enumeration
+      // attacks. Don't add UserNotFoundException handling.
+      throw err;
+    }
   },
 
   async confirmPasswordReset(
-    _email: string,
-    _code: string,
-    _newPassword: string,
+    email: string,
+    code: string,
+    newPassword: string,
   ): Promise<void> {
-    throw new Error(
-      "CognitoProvider.confirmPasswordReset not yet implemented (Phase 2 Step 3c).",
-    );
+    const client = getClient();
+    try {
+      await client.send(
+        new ConfirmForgotPasswordCommand({
+          ClientId: env.COGNITO_CLIENT_ID!,
+          Username: email,
+          ConfirmationCode: code,
+          Password: newPassword,
+          SecretHash: computeSecretHash(email),
+        }),
+      );
+    } catch (err) {
+      if (err instanceof CodeMismatchException) {
+        throw new Error("Reset code is incorrect.");
+      }
+      if (err instanceof ExpiredCodeException) {
+        throw new Error("Reset code has expired. Request a new one.");
+      }
+      if (err instanceof InvalidPasswordException) {
+        throw new Error(
+          "New password does not meet requirements (8+ chars, mix of cases, numbers, special chars).",
+        );
+      }
+      throw err;
+    }
   },
 };

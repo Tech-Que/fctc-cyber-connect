@@ -1,4 +1,9 @@
-import { createRemoteJWKSet, jwtVerify, type JWTPayload } from "jose";
+import {
+  createRemoteJWKSet,
+  decodeJwt,
+  jwtVerify,
+  type JWTPayload,
+} from "jose";
 import { env } from "@/lib/env";
 
 /**
@@ -69,4 +74,18 @@ export async function verifyIdToken(
   }
 
   return claims;
+}
+
+/**
+ * Decode an ID token WITHOUT verifying signature or expiry. Returns the
+ * payload as plain JS. Use only when the token's authenticity isn't load-
+ * bearing for the operation — e.g., extracting `sub` from a possibly-expired
+ * IdToken in order to compute SECRET_HASH for a refresh call. The refresh
+ * call itself is authenticated by the (encrypted) refresh token; we just
+ * need the user's sub to compute the HMAC.
+ *
+ * Never use this output for authorization decisions.
+ */
+export function decodeIdToken(token: string): CognitoIdTokenClaims {
+  return decodeJwt(token) as CognitoIdTokenClaims;
 }

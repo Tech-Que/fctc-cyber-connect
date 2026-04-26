@@ -75,7 +75,10 @@ export const mockAuthProvider: AuthProvider = {
     return user;
   },
 
-  async refreshSession(refreshToken: string): Promise<AuthSession> {
+  async refreshSession(
+    refreshToken: string,
+    _idToken: string,
+  ): Promise<AuthSession> {
     const userId = refreshToken.replace("mock-refresh-", "");
     const user = Object.values(MOCK_USERS).find((u) => u.id === userId);
     if (!user) throw new Error("Mock auth: invalid refresh token.");

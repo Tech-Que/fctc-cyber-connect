@@ -179,10 +179,13 @@ export const cognitoProvider: AuthProvider = {
     }
   },
 
-  async signOut(_accessToken: string): Promise<void> {
-    throw new Error(
-      "CognitoProvider.signOut not yet implemented (Phase 2 Step 3b).",
-    );
+  async signOut(_idToken: string): Promise<void> {
+    // No-op. Local signout is handled by clearing the HTTP-only cookies in
+    // the /api/auth/signout route. Server-side invalidation (GlobalSignOut)
+    // is deferred to Phase 7+ — see roadmap "Deferred polish" — because it
+    // requires storing the AccessToken in a third cookie (GlobalSignOut takes
+    // an AccessToken, not an IdToken) and the simple cookie-clear is sufficient
+    // for the threat model at this stage.
   },
 
   async getUserFromToken(accessToken: string): Promise<AuthUser> {

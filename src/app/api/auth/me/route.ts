@@ -1,19 +1,16 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getAuthProvider } from "@/lib/auth/factory";
+import { readSessionCookies } from "@/lib/auth/cookies";
 
 export async function GET(req: NextRequest) {
-  const authHeader = req.headers.get("authorization");
-  if (!authHeader?.startsWith("Bearer ")) {
-    return NextResponse.json(
-      { error: "Missing or malformed Authorization header" },
-      { status: 401 },
-    );
+  const { idToken } = readSessionCookies(req.cookies);
+  if (!idToken) {
+    return NextResponse.json({ error: "Not signed in." }, { status: 401 });
   }
 
-  const token = authHeader.slice(7);
   try {
     const provider = getAuthProvider();
-    const user = await provider.getUserFromToken(token);
+    const user = await provider.getUserFromToken(idToken);
     return NextResponse.json({ user });
   } catch (err) {
     const message =

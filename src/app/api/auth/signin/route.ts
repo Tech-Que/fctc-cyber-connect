@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { getAuthProvider } from "@/lib/auth/factory";
+import { setSessionCookies } from "@/lib/auth/cookies";
 
 const signinSchema = z.object({
   email: z.string().email(),
@@ -24,18 +25,16 @@ export async function POST(req: NextRequest) {
     const provider = getAuthProvider();
     const session = await provider.signIn(parsed.data);
 
-    return NextResponse.json({
+    const res = NextResponse.json({
       user: session.user,
       expiresAt: session.expiresAt,
-      // TODO(Phase 2 Step 3d): remove these two fields once HTTP-only cookie
-      // session is wired. Exposing tokens in the JSON body is a temporary
-      // affordance for live testing of /api/auth/me and /api/auth/refresh;
-      // production-shaped sessions never hand the raw tokens to JS.
-      accessToken: session.accessToken,
-      refreshToken: session.refreshToken,
-      message:
-        "Signed in successfully. Note: token-based session not yet wired (Step 3d).",
+      message: "Signed in successfully.",
     });
+    setSessionCookies(res, {
+      idToken: session.accessToken,
+      refreshToken: session.refreshToken,
+    });
+    return res;
   } catch (err) {
     const message = err instanceof Error ? err.message : "Sign-in failed.";
     return NextResponse.json({ error: message }, { status: 401 });

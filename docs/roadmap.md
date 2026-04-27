@@ -33,6 +33,7 @@ Phase plan, deferred work, and post-MVP ideas. Source-of-truth detail behind the
 - **Assistant input length cap:** add `maxLength={2000}` plus visible character counter that turns red as the cap approaches. Server-side cap (10k chars) already enforced; UI prevention is UX polish.
 - **Real-iPhone verification:** complete the device-testing pass when back on home WiFi (hotel network blocked direct phone connection during Phase 1; DevTools iPhone 14 Pro Max viewport used as substitute).
 - **Replace `next-pwa@5.6.0` with `@ducanh2912/next-pwa`** (community-maintained fork on Workbox v7) when Phase 7 polish allows. The 7 npm audit warnings (2 moderate, 5 high) are workbox v6 transitive deps; predominantly dev-time impact, not runtime-exploitable in current usage. Risk-accepted for Phase 1.
+- **Auth: store Cognito AccessToken in a third HTTP-only cookie (`fctc-access`) and call `GlobalSignOut` on signout to invalidate all refresh tokens server-side.** Phase 2 Step 3d ships local-only signout (clears the `fctc-session` and `fctc-refresh` cookies) which is sufficient for the current single-device threat model. Adding `GlobalSignOut` requires the AccessToken (it doesn't accept an IdToken) — hence the third cookie. Worth doing once we add multi-device session listings or "sign out everywhere" UX. Captured 2026-04-27 during Step 3d.
 
 ## Out of scope (or deferred post-MVP)
 

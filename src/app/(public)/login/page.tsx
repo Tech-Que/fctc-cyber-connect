@@ -1,16 +1,24 @@
 "use client";
 
-import { useState } from "react";
+import { Suspense, useState } from "react";
 import Link from "next/link";
+import { useRouter, useSearchParams } from "next/navigation";
 import { Button, Card, CardBody, Container, Input } from "@/components/ui";
+import { apiPost } from "@/lib/api/client";
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-export default function LoginPage() {
+function LoginPageInner() {
+  const router = useRouter();
+  const searchParams = useSearchParams();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [submitted, setSubmitted] = useState(false);
-  const [stubMessage, setStubMessage] = useState<string | null>(null);
+  const [submitting, setSubmitting] = useState(false);
+  const [serverError, setServerError] = useState<string | null>(null);
+
+  const justVerified = searchParams.get("verified") === "1";
+  const justReset = searchParams.get("reset") === "1";
 
   const emailError =
     submitted && !EMAIL_RE.test(email)
@@ -19,13 +27,23 @@ export default function LoginPage() {
   const passwordError =
     submitted && !password ? "Password is required." : undefined;
 
-  function handleSubmit(e: React.FormEvent) {
+  async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setSubmitted(true);
-    if (EMAIL_RE.test(email) && password) {
-      setStubMessage("Auth wires up in Phase 2. Nothing submitted.");
-    } else {
-      setStubMessage(null);
+    setServerError(null);
+    if (!EMAIL_RE.test(email) || !password) return;
+
+    setSubmitting(true);
+    try {
+      await apiPost("/api/auth/signin", { email, password });
+      // Full reload so any cached server-component state from the prior
+      // (signed-out) render gets discarded.
+      router.push("/dashboard");
+      router.refresh();
+    } catch (err) {
+      setServerError(err instanceof Error ? err.message : "Sign-in failed.");
+    } finally {
+      setSubmitting(false);
     }
   }
 
@@ -43,6 +61,17 @@ export default function LoginPage() {
 
         <Card>
           <CardBody className="flex flex-col gap-5">
+            {(justVerified || justReset) && (
+              <div
+                role="status"
+                className="rounded-md bg-success/10 border border-success text-sm text-success p-3 text-center"
+              >
+                {justVerified
+                  ? "Email verified. You can sign in now."
+                  : "Password reset. Sign in with your new password."}
+              </div>
+            )}
+
             <form onSubmit={handleSubmit} className="flex flex-col gap-4">
               <Input
                 label="Email"
@@ -64,26 +93,32 @@ export default function LoginPage() {
                 />
                 <div className="text-right mt-1.5">
                   <Link
-                    href="/login"
+                    href="/forgot-password"
                     className="text-accent text-sm hover:underline"
                   >
                     Forgot password?
                   </Link>
                 </div>
               </div>
-              <Button type="submit" variant="primary" className="w-full">
-                Sign In
+
+              {serverError && (
+                <p
+                  role="alert"
+                  className="text-sm text-danger text-center"
+                >
+                  {serverError}
+                </p>
+              )}
+
+              <Button
+                type="submit"
+                variant="primary"
+                disabled={submitting}
+                className="w-full"
+              >
+                {submitting ? "Signing in..." : "Sign In"}
               </Button>
             </form>
-
-            {stubMessage && (
-              <div
-                role="status"
-                className="rounded-md bg-bg-subtle border border-border text-sm text-text-muted p-3 text-center"
-              >
-                {stubMessage}
-              </div>
-            )}
 
             <div className="relative flex items-center">
               <div className="flex-1 border-t border-border" />
@@ -97,7 +132,7 @@ export default function LoginPage() {
               variant="secondary"
               disabled
               className="w-full"
-              title="Coming in Phase 2"
+              title="Coming later"
             >
               Continue with GitHub
             </Button>
@@ -115,5 +150,13 @@ export default function LoginPage() {
         </p>
       </div>
     </Container>
+  );
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense>
+      <LoginPageInner />
+    </Suspense>
   );
 }

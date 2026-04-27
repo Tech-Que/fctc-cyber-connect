@@ -2,7 +2,9 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { Button, Card, CardBody, Container, Input } from "@/components/ui";
+import { apiPost } from "@/lib/api/client";
 import { cn } from "@/lib/utils/cn";
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -28,13 +30,15 @@ const ROLES: Array<{ key: SignupRole; name: string; desc: string }> = [
 ];
 
 export default function SignupPage() {
+  const router = useRouter();
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirm, setConfirm] = useState("");
   const [role, setRole] = useState<SignupRole | null>(null);
   const [submitted, setSubmitted] = useState(false);
-  const [stubMessage, setStubMessage] = useState<string | null>(null);
+  const [submitting, setSubmitting] = useState(false);
+  const [serverError, setServerError] = useState<string | null>(null);
 
   const nameError =
     submitted && !name.trim() ? "Display name is required." : undefined;
@@ -50,19 +54,31 @@ export default function SignupPage() {
     submitted && confirm !== password ? "Passwords don't match." : undefined;
   const roleError = submitted && !role ? "Please select a role." : undefined;
 
-  function handleSubmit(e: React.FormEvent) {
+  async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setSubmitted(true);
+    setServerError(null);
     const valid =
       name.trim() &&
       EMAIL_RE.test(email) &&
       password.length >= 8 &&
       confirm === password &&
       role;
-    if (valid) {
-      setStubMessage("Auth wires up in Phase 2. Nothing submitted.");
-    } else {
-      setStubMessage(null);
+    if (!valid) return;
+
+    setSubmitting(true);
+    try {
+      await apiPost("/api/auth/signup", {
+        email,
+        password,
+        displayName: name.trim(),
+        role,
+      });
+      router.push(`/verify?email=${encodeURIComponent(email)}`);
+    } catch (err) {
+      setServerError(err instanceof Error ? err.message : "Signup failed.");
+    } finally {
+      setSubmitting(false);
     }
   }
 
@@ -153,18 +169,20 @@ export default function SignupPage() {
                 policies.
               </p>
 
-              <Button type="submit" variant="primary" className="w-full">
-                Create Account
-              </Button>
-
-              {stubMessage && (
-                <div
-                  role="status"
-                  className="rounded-md bg-bg-subtle border border-border text-sm text-text-muted p-3 text-center"
-                >
-                  {stubMessage}
-                </div>
+              {serverError && (
+                <p role="alert" className="text-sm text-danger text-center">
+                  {serverError}
+                </p>
               )}
+
+              <Button
+                type="submit"
+                variant="primary"
+                disabled={submitting}
+                className="w-full"
+              >
+                {submitting ? "Creating account..." : "Create Account"}
+              </Button>
             </form>
           </CardBody>
         </Card>

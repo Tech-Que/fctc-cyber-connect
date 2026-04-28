@@ -7,8 +7,10 @@ import { usePathname } from "next/navigation";
 import { Menu, X } from "lucide-react";
 import { ThemeToggle } from "./ThemeToggle";
 import { cn } from "@/lib/utils/cn";
+import { signOut } from "@/lib/auth/client-actions";
+import type { AuthUser } from "@/lib/auth/types";
 
-const primaryLinks = [
+const publicLinks = [
   { href: "/program", label: "Program" },
   { href: "/community", label: "Community" },
   { href: "/assistant", label: "Assistant" },
@@ -27,7 +29,7 @@ function isActive(pathname: string, href: string) {
   return pathname === href || pathname.startsWith(href + "/");
 }
 
-export function Nav() {
+export function Nav({ user }: { user: AuthUser | null }) {
   const pathname = usePathname();
   const [drawerOpen, setDrawerOpen] = useState(false);
 
@@ -43,6 +45,20 @@ export function Nav() {
   useEffect(() => {
     setDrawerOpen(false);
   }, [pathname]);
+
+  const isAdmin = user?.role === "admin";
+
+  // Drawer link list: public links always shown; signed-in users also see
+  // Dashboard (and Admin if role=admin) at the bottom of the primary list,
+  // styled the same as the public links so the drawer reads as one cohesive
+  // navigation surface.
+  const drawerPrimaryLinks = user
+    ? [
+        ...publicLinks,
+        { href: "/dashboard", label: "Dashboard" },
+        ...(isAdmin ? [{ href: "/admin", label: "Admin" }] : []),
+      ]
+    : publicLinks;
 
   return (
     <>
@@ -66,7 +82,7 @@ export function Nav() {
           </Link>
 
           <nav className="hidden md:flex items-center gap-6" aria-label="Primary">
-            {primaryLinks.map((link) => (
+            {publicLinks.map((link) => (
               <Link
                 key={link.href}
                 href={link.href}
@@ -84,12 +100,52 @@ export function Nav() {
 
           <div className="hidden md:flex items-center gap-2">
             <ThemeToggle />
-            <Link href="/login" className={ghostSm}>
-              Login
-            </Link>
-            <Link href="/signup" className={primarySm}>
-              Sign up
-            </Link>
+            {user ? (
+              <>
+                <Link
+                  href="/dashboard"
+                  className={cn(
+                    ghostSm,
+                    isActive(pathname, "/dashboard") && "text-accent",
+                  )}
+                >
+                  Dashboard
+                </Link>
+                {isAdmin && (
+                  <Link
+                    href="/admin"
+                    className={cn(
+                      ghostSm,
+                      isActive(pathname, "/admin") && "text-accent",
+                    )}
+                  >
+                    Admin
+                  </Link>
+                )}
+                <span
+                  className="text-sm text-text-muted px-2 max-w-[14ch] truncate"
+                  title={user.email}
+                >
+                  {user.displayName ?? user.email}
+                </span>
+                <button
+                  type="button"
+                  onClick={() => signOut()}
+                  className={ghostSm}
+                >
+                  Sign out
+                </button>
+              </>
+            ) : (
+              <>
+                <Link href="/login" className={ghostSm}>
+                  Login
+                </Link>
+                <Link href="/signup" className={primarySm}>
+                  Sign up
+                </Link>
+              </>
+            )}
           </div>
 
           <div className="md:hidden flex items-center gap-1">
@@ -145,7 +201,7 @@ export function Nav() {
             className="flex-1 px-6 py-8 flex flex-col gap-2"
             aria-label="Mobile menu"
           >
-            {primaryLinks.map((link) => (
+            {drawerPrimaryLinks.map((link) => (
               <Link
                 key={link.href}
                 href={link.href}
@@ -163,20 +219,47 @@ export function Nav() {
           </nav>
 
           <div className="px-6 pb-8 flex flex-col gap-3 border-t border-border pt-6">
-            <Link
-              href="/login"
-              onClick={() => setDrawerOpen(false)}
-              className={cn(ghostSm, "w-full h-11 text-base")}
-            >
-              Login
-            </Link>
-            <Link
-              href="/signup"
-              onClick={() => setDrawerOpen(false)}
-              className={cn(primarySm, "w-full h-11 text-base")}
-            >
-              Sign up
-            </Link>
+            {user ? (
+              <>
+                <div className="flex flex-col gap-0.5 px-2 pb-1">
+                  <span className="text-sm font-medium text-text-primary">
+                    {user.displayName ?? user.email}
+                  </span>
+                  {user.displayName && (
+                    <span className="text-xs text-text-muted truncate">
+                      {user.email}
+                    </span>
+                  )}
+                </div>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setDrawerOpen(false);
+                    signOut();
+                  }}
+                  className={cn(ghostSm, "w-full h-11 text-base")}
+                >
+                  Sign out
+                </button>
+              </>
+            ) : (
+              <>
+                <Link
+                  href="/login"
+                  onClick={() => setDrawerOpen(false)}
+                  className={cn(ghostSm, "w-full h-11 text-base")}
+                >
+                  Login
+                </Link>
+                <Link
+                  href="/signup"
+                  onClick={() => setDrawerOpen(false)}
+                  className={cn(primarySm, "w-full h-11 text-base")}
+                >
+                  Sign up
+                </Link>
+              </>
+            )}
           </div>
         </div>
       )}

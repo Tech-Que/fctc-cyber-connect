@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import { Inter, JetBrains_Mono, Orbitron } from "next/font/google";
 import "./globals.css";
 import { Shell } from "@/components/layout/Shell";
+import { getCurrentUser } from "@/lib/auth/session";
 
 const inter = Inter({
   variable: "--font-inter",
@@ -60,11 +61,13 @@ const themeInitScript = `(function(){try{var s=localStorage.getItem('fctc-theme'
 // non-blocking, so we don't pay a TTFB penalty for this.
 const swRegisterScript = `if('serviceWorker' in navigator){navigator.serviceWorker.register('/sw.js',{scope:'/'}).catch(function(e){console.error('SW registration failed:',e)})}`;
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const user = await getCurrentUser();
+
   return (
     <html
       lang="en"
@@ -76,7 +79,7 @@ export default function RootLayout({
         <script dangerouslySetInnerHTML={{ __html: swRegisterScript }} />
       </head>
       <body className="antialiased">
-        <Shell>{children}</Shell>
+        <Shell user={user}>{children}</Shell>
       </body>
     </html>
   );

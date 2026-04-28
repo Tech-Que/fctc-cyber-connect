@@ -36,9 +36,11 @@ function LoginPageInner() {
     setSubmitting(true);
     try {
       await apiPost("/api/auth/signin", { email, password });
-      // Full reload so any cached server-component state from the prior
-      // (signed-out) render gets discarded.
-      router.push("/dashboard");
+      // Honor ?redirect= so users land back on whatever protected route
+      // bounced them here. Full router.refresh() so cached server-component
+      // state from the prior (signed-out) render gets discarded.
+      const redirectTo = searchParams.get("redirect") ?? "/dashboard";
+      router.push(redirectTo);
       router.refresh();
     } catch (err) {
       setServerError(err instanceof Error ? err.message : "Sign-in failed.");

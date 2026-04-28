@@ -13,6 +13,7 @@ import {
   getAllThreads,
   getPostsByThread,
 } from "@/lib/mock";
+import { AdminOnlyBanner } from "./AdminOnlyBanner";
 
 const DATE_FORMAT = new Intl.DateTimeFormat("en-US", {
   weekday: "long",
@@ -45,6 +46,8 @@ export default function DashboardPage() {
         </h1>
         <p className="text-text-muted">{today}</p>
       </header>
+
+      <AdminOnlyBanner />
 
       <div className="flex items-start gap-3 bg-bg-subtle border border-border rounded-lg p-3">
         <Badge variant="warning" className="shrink-0">

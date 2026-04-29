@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "@aws-sdk/client-cognito-identity-provider": "^3.1037.0",
+    "@prisma/client": "^7.8.0",
     "clsx": "^2.1.1",
     "jose": "^6.2.2",
     "lucide-react": "^1.9.0",
@@ -30,6 +31,7 @@
     "@types/react-dom": "^19",
     "eslint": "^9",
     "eslint-config-next": "15.5.15",
+    "prisma": "^7.8.0",
     "sharp": "^0.34.5",
     "tailwindcss": "^4",
     "typescript": "^5"

@@ -1,0 +1,238 @@
+// Prisma schema for FCTC Cyber Connect.
+// See docs/architecture.md for design rationale.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  // Prisma 7 moved url + directUrl out of the schema and into
+  // prisma.config.ts. The provider stays here so the CLI knows what
+  // SQL dialect to generate.
+}
+
+// ============================================================
+// Enums
+// ============================================================
+
+enum UserRole {
+  prospective
+  current
+  alumni
+  admin
+}
+
+enum ThreadCategory {
+  general
+  help
+  resources
+  announcements
+  alumni_only
+}
+
+enum AuditAction {
+  user_created
+  user_role_changed
+  user_suspended
+  user_unsuspended
+  thread_created
+  thread_deleted
+  thread_restored
+  thread_pinned
+  thread_unpinned
+  post_deleted
+  post_restored
+  comment_deleted
+  comment_restored
+  report_resolved
+  report_dismissed
+}
+
+// ============================================================
+// Users — mirrors Cognito sub claim, holds rich profile
+// ============================================================
+
+model User {
+  id              String    @id                          // Cognito sub claim
+  email           String    @unique
+  displayName     String?   @map("display_name")
+  role            UserRole  @default(prospective)
+  bio             String?
+  avatarUrl       String?   @map("avatar_url")
+  suspended       Boolean   @default(false)
+  suspendedAt     DateTime? @map("suspended_at")
+  suspendedBy     String?   @map("suspended_by")
+  suspendedReason String?   @map("suspended_reason")
+
+  createdAt       DateTime  @default(now()) @map("created_at")
+  updatedAt       DateTime  @updatedAt      @map("updated_at")
+  lastSeenAt      DateTime? @map("last_seen_at")
+
+  // Relations
+  threadsAuthored Thread[]  @relation("ThreadAuthor")
+  threadsDeleted  Thread[]  @relation("ThreadDeletedBy")
+  postsAuthored   Post[]    @relation("PostAuthor")
+  postsDeleted    Post[]    @relation("PostDeletedBy")
+  commentsAuthored Comment[] @relation("CommentAuthor")
+  commentsDeleted Comment[] @relation("CommentDeletedBy")
+  reportsFiled    Report[]  @relation("ReportFiler")
+  reportsResolved Report[]  @relation("ReportResolver")
+  auditLogActor   AuditLog[] @relation("AuditLogActor")
+
+  @@map("users")
+  @@index([role])
+  @@index([suspended])
+}
+
+// ============================================================
+// Threads — top-level discussion posts on the message board
+// ============================================================
+
+model Thread {
+  id          String          @id @default(cuid())
+  title       String
+  body        String          @db.Text
+  category    ThreadCategory  @default(general)
+  pinned      Boolean         @default(false)
+
+  authorId    String          @map("author_id")
+  author      User            @relation("ThreadAuthor", fields: [authorId], references: [id])
+
+  // Soft-delete
+  deletedAt   DateTime?       @map("deleted_at")
+  deletedById String?         @map("deleted_by")
+  deletedBy   User?           @relation("ThreadDeletedBy", fields: [deletedById], references: [id])
+  deleteReason String?        @map("delete_reason")
+
+  createdAt   DateTime        @default(now()) @map("created_at")
+  updatedAt   DateTime        @updatedAt      @map("updated_at")
+
+  posts       Post[]
+  reports     Report[]
+
+  @@map("threads")
+  @@index([category, deletedAt])
+  @@index([authorId])
+  @@index([pinned, createdAt(sort: Desc)])
+}
+
+// ============================================================
+// Posts — replies to a Thread
+// ============================================================
+
+model Post {
+  id        String    @id @default(cuid())
+  body      String    @db.Text
+
+  threadId  String    @map("thread_id")
+  thread    Thread    @relation(fields: [threadId], references: [id])
+
+  authorId  String    @map("author_id")
+  author    User      @relation("PostAuthor", fields: [authorId], references: [id])
+
+  // Soft-delete
+  deletedAt   DateTime? @map("deleted_at")
+  deletedById String?   @map("deleted_by")
+  deletedBy   User?     @relation("PostDeletedBy", fields: [deletedById], references: [id])
+  deleteReason String?  @map("delete_reason")
+
+  createdAt DateTime  @default(now()) @map("created_at")
+  updatedAt DateTime  @updatedAt      @map("updated_at")
+
+  comments  Comment[]
+  reports   Report[]
+
+  @@map("posts")
+  @@index([threadId, deletedAt])
+  @@index([authorId])
+}
+
+// ============================================================
+// Comments — replies to a Post
+// ============================================================
+
+model Comment {
+  id       String    @id @default(cuid())
+  body     String    @db.Text
+
+  postId   String    @map("post_id")
+  post     Post      @relation(fields: [postId], references: [id])
+
+  authorId String    @map("author_id")
+  author   User      @relation("CommentAuthor", fields: [authorId], references: [id])
+
+  // Soft-delete
+  deletedAt   DateTime? @map("deleted_at")
+  deletedById String?   @map("deleted_by")
+  deletedBy   User?     @relation("CommentDeletedBy", fields: [deletedById], references: [id])
+  deleteReason String?  @map("delete_reason")
+
+  createdAt DateTime  @default(now()) @map("created_at")
+  updatedAt DateTime  @updatedAt      @map("updated_at")
+
+  reports   Report[]
+
+  @@map("comments")
+  @@index([postId, deletedAt])
+  @@index([authorId])
+}
+
+// ============================================================
+// Reports — flagged content for moderation queue
+// ============================================================
+
+model Report {
+  id          String    @id @default(cuid())
+  reason      String    @db.Text
+
+  filedById   String    @map("filed_by_id")
+  filedBy     User      @relation("ReportFiler", fields: [filedById], references: [id])
+
+  // One of these is non-null depending on what was reported
+  threadId    String?   @map("thread_id")
+  thread      Thread?   @relation(fields: [threadId], references: [id])
+  postId      String?   @map("post_id")
+  post        Post?     @relation(fields: [postId], references: [id])
+  commentId   String?   @map("comment_id")
+  comment     Comment?  @relation(fields: [commentId], references: [id])
+
+  resolved      Boolean   @default(false)
+  resolvedAt    DateTime? @map("resolved_at")
+  resolvedById  String?   @map("resolved_by_id")
+  resolvedBy    User?     @relation("ReportResolver", fields: [resolvedById], references: [id])
+  resolution    String?
+
+  createdAt   DateTime  @default(now()) @map("created_at")
+  updatedAt   DateTime  @updatedAt      @map("updated_at")
+
+  @@map("reports")
+  @@index([resolved, createdAt])
+  @@index([filedById])
+}
+
+// ============================================================
+// Audit Log — append-only record of moderation actions
+// ============================================================
+
+model AuditLog {
+  id          String       @id @default(cuid())
+  action      AuditAction
+
+  actorId     String       @map("actor_id")
+  actor       User         @relation("AuditLogActor", fields: [actorId], references: [id])
+
+  // Polymorphic target — one of these set, others null
+  targetType  String       @map("target_type")  // "user" | "thread" | "post" | "comment" | "report"
+  targetId    String       @map("target_id")
+
+  reason      String?      @db.Text
+  metadata    Json?        // freeform context — old values, etc.
+
+  createdAt   DateTime     @default(now()) @map("created_at")
+
+  @@map("audit_log")
+  @@index([actorId, createdAt])
+  @@index([targetType, targetId])
+  @@index([action, createdAt])
+}
